@@ -88,6 +88,18 @@ Para usar a implantação local, deixe `VITE_CONTRACT_ADDRESS` e `VITE_DEPLOYMEN
 
 Reiniciar o nó apaga o histórico local. Faça nova implantação, reinicie a interface e limpe a atividade da conta local na MetaMask se o nonce estiver desatualizado. Para voltar à Sepolia, restaure o RPC e informe o endereço do contrato Sepolia e seu bloco no `.env`, ou restaure a configuração gerada anterior.
 
+## Hospedar na Vercel pelo GitHub
+
+1. Envie a versão atual ao repositório do GitHub e, no painel da Vercel, escolha **Add New → Project → Import Git Repository**.
+2. Importe o repositório `NadsonCruzSilva/mural`, na branch `main`, com a pasta raiz `./`. O arquivo `vercel.json` define o framework Vite, instalação `npm ci`, build `npm run build` e saída `dist`.
+3. Em **Environment Variables**, configure os mesmos valores públicos de `VITE_RPC_URL`, `VITE_CONTRACT_ADDRESS` e `VITE_DEPLOYMENT_BLOCK` usados localmente. Se nenhuma configuração explícita for fornecida, o projeto usa o contrato público registrado em `src/generated/site.json` e o RPC público padrão da Sepolia. Não envie seu `.env` ao GitHub nem configure chave privada na Vercel.
+4. Confira o acesso desejado antes de publicar: o link da demonstração precisa permitir que os participantes o abram. Clique em **Deploy** quando estiver pronto para disponibilizar o site ao público escolhido.
+5. Após a publicação, abra o link no navegador com MetaMask e faça uma publicação de teste. A carteira deve estar na Ethereum Sepolia, com ETH de teste. O contrato e os recados permanecem na blockchain; trocar a hospedagem não cria um novo mural.
+
+As variáveis `VITE_` são incorporadas no build e são públicas. Se mudar o endereço ou o bloco no painel da Vercel, gere uma nova implantação (**Redeploy**). Novos commits enviados à branch de produção também podem disparar novas implantações após conectar o repositório à Vercel.
+
+Referência: [Vite na Vercel](https://vercel.com/docs/frameworks/frontend/vite).
+
 ## Verificação
 
 ```sh
