@@ -8,6 +8,8 @@ import {
   type TransactionReceipt,
 } from "ethers";
 import abi from "./generated/abi.json";
+import { resolveDeployment, type Deployment } from "./config";
+import { MESSAGE_LIMIT, ensureMessageLimit } from "./limits";
 
 export type InjectedProvider = Eip1193Provider & {
   isMetaMask?: boolean;
@@ -20,17 +22,18 @@ declare global {
     ethereum?: InjectedProvider;
   }
 }
-export type Deployment = {
-  address: string;
-  chainId: number;
-  deploymentBlock: number;
-};
-const deployments = import.meta.glob("./generated/deployment.json", {
-  eager: true,
-  import: "default",
-});
-export const deployment = Object.values(deployments)[0] as
-  Deployment | undefined;
+const deployments = import.meta.glob(
+  ["./generated/deployment.json", "./generated/site.json"],
+  {
+    eager: true,
+    import: "default",
+  },
+);
+export const deployment = resolveDeployment(
+  import.meta.env,
+  (deployments["./generated/deployment.json"] ??
+    deployments["./generated/site.json"]) as Deployment | undefined,
+);
 export const configured =
   !!deployment &&
   isAddress(deployment.address) &&
@@ -50,7 +53,7 @@ export const shortAddress = (address: string) =>
   `${address.slice(0, 6)}…${address.slice(-4)}`;
 export const characterCount = (value: string) => Array.from(value).length;
 export const validMessage = (value: string) =>
-  value.length > 0 && characterCount(value) <= 280;
+  value.length > 0 && characterCount(value) <= MESSAGE_LIMIT;
 export const txUrl = (hash: string) =>
   chainId === 11155111 ? `https://sepolia.etherscan.io/tx/${hash}` : undefined;
 export function metamask() {
@@ -67,6 +70,7 @@ export function readableError(error: unknown): string {
     info?: { error?: { code?: number } };
     message?: string;
   };
+  if (e?.code === "CONTRACT_VERSION_MISMATCH") return e.message!;
   if (
     e?.code === 4001 ||
     e?.code === "ACTION_REJECTED" ||
@@ -158,8 +162,12 @@ export async function readTotal(block: number) {
     throw new Error("RPC conectado à rede errada");
   if ((await rpc.getCode(deployment!.address, block)) === "0x")
     throw new Error("Contrato ausente nesta rede");
+  const contract = new Contract(deployment!.address, abi, rpc);
+  await ensureMessageLimit(() =>
+    contract.MAX_MESSAGE_CHARACTERS({ blockTag: block }),
+  );
   return Number(
-    await new Contract(deployment!.address, abi, rpc).totalMessages({
+    await contract.totalMessages({
       blockTag: block,
     }),
   );
@@ -205,6 +213,7 @@ export async function publish(
   if (!configured || (await browser.getCode(deployment!.address)) === "0x")
     throw new Error("Contrato ausente nesta rede");
   const contract = new Contract(deployment!.address, abi, signer);
+  await ensureMessageLimit(() => contract.MAX_MESSAGE_CHARACTERS());
   const tx = await contract.publishMessage(content);
   onSent(tx.hash);
   function confirmedHash(receipt: TransactionReceipt | null): string {

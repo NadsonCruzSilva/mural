@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 /// @notice Append-only public messages. Characters are Unicode scalar values, not graphemes.
 contract Mural {
+    uint256 public constant MAX_MESSAGE_CHARACTERS = 1500;
     struct Message { uint256 id; string content; address author; uint256 timestamp; }
     Message[] private messages;
     error EmptyMessage();
@@ -15,7 +16,7 @@ contract Mural {
     function publishMessage(string calldata content) external {
         bytes calldata data = bytes(content);
         if (data.length == 0) revert EmptyMessage();
-        if (data.length > 1120) revert MessageTooLong();
+        if (data.length > MAX_MESSAGE_CHARACTERS * 4) revert MessageTooLong();
         uint256 count;
         for (uint256 i; i < data.length;) {
             uint8 c = uint8(data[i]);
@@ -36,7 +37,7 @@ contract Mural {
                     || (c == 0xf0 && second < 0x90) || (c == 0xf4 && second >= 0x90)) revert InvalidUtf8();
             }
             i += width;
-            if (++count > 280) revert MessageTooLong();
+            if (++count > MAX_MESSAGE_CHARACTERS) revert MessageTooLong();
         }
         uint256 id = messages.length + 1;
         messages.push(Message(id, content, msg.sender, block.timestamp));

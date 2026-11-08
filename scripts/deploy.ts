@@ -2,13 +2,12 @@ import { network } from "hardhat";
 import { mkdir, writeFile } from "node:fs/promises";
 const { ethers } = await network.create();
 const chainId = Number((await ethers.provider.getNetwork()).chainId);
-if (![11155111, 31337].includes(chainId))
-  throw new Error("Implantação permitida somente na Sepolia ou Hardhat local.");
-const [signer] = await ethers.getSigners();
-if (!signer)
+if (chainId !== 31337)
   throw new Error(
-    "Configure DEPLOYER_PRIVATE_KEY no .env com uma carteira de testes.",
+    "Este script implanta somente no Hardhat local. Na Sepolia, use Remix e MetaMask conforme o README.",
   );
+const [signer] = await ethers.getSigners();
+if (!signer) throw new Error("Inicie o nó Hardhat local com npm run node.");
 const contract = await ethers.deployContract("Mural", [], signer);
 await contract.waitForDeployment();
 const receipt = await contract.deploymentTransaction()!.wait(1);

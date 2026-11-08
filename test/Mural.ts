@@ -12,6 +12,7 @@ describe("Mural", async () => {
   it("starts empty and returns empty pages", async () => {
     const c = await fixture();
     assert.equal(await c.totalMessages(), 0n);
+    assert.equal(await c.MAX_MESSAGE_CHARACTERS(), 1500n);
     assert.equal((await c.getMessages(0, 20)).length, 0);
     await assert.rejects(c.getMessage(0));
     await assert.rejects(c.getMessage(1));
@@ -40,18 +41,18 @@ describe("Mural", async () => {
     assert.equal(events[0].args.author, first.address);
     assert.equal(events[0].args.timestamp, message.timestamp);
   });
-  it("accepts 280 Unicode scalar values and rejects empty / 281", async () => {
+  it("accepts 1500 Unicode scalar values and rejects empty / 1501", async () => {
     const c = await fixture();
     await assert.rejects(c.publishMessage(""));
     for (const character of ["a", "á", "界", "🌎"]) {
-      await (await c.publishMessage(character.repeat(280))).wait();
-      await assert.rejects(c.publishMessage(character.repeat(281)));
+      await (await c.publishMessage(character.repeat(1500))).wait();
+      await assert.rejects(c.publishMessage(character.repeat(1501)));
     }
     assert.equal(await c.totalMessages(), 4n);
-    assert.equal((await c.getMessage(4)).content, "🌎".repeat(280));
+    assert.equal((await c.getMessage(4)).content, "🌎".repeat(1500));
     // Combining marks and ZWJ are individual scalar values, matching Array.from in the UI.
-    await (await c.publishMessage("e\u0301".repeat(140))).wait();
-    await assert.rejects(c.publishMessage("e\u0301".repeat(141)));
+    await (await c.publishMessage("e\u0301".repeat(750))).wait();
+    await assert.rejects(c.publishMessage("e\u0301".repeat(751)));
   });
   it("rejects malformed UTF-8 even when called without the UI", async () => {
     const c = await fixture();
@@ -94,7 +95,13 @@ describe("Mural", async () => {
         .filter((f) => f.type === "function")
         .map((f) => f.name)
         .sort(),
-      ["getMessage", "getMessages", "publishMessage", "totalMessages"],
+      [
+        "MAX_MESSAGE_CHARACTERS",
+        "getMessage",
+        "getMessages",
+        "publishMessage",
+        "totalMessages",
+      ],
     );
     await assert.rejects(c.publishMessage("valor", { value: 1n }));
   });

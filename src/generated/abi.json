@@ -1,78 +1,184 @@
 [
-  { "type": "error", "name": "EmptyMessage", "inputs": [] },
-  { "type": "error", "name": "InvalidId", "inputs": [] },
-  { "type": "error", "name": "InvalidLimit", "inputs": [] },
-  { "type": "error", "name": "InvalidUtf8", "inputs": [] },
-  { "type": "error", "name": "MessageTooLong", "inputs": [] },
   {
-    "type": "event",
-    "anonymous": false,
-    "name": "MessagePublished",
-    "inputs": [
-      { "type": "uint256", "name": "id", "indexed": true },
-      { "type": "address", "name": "author", "indexed": true },
-      { "type": "string", "name": "content", "indexed": false },
-      { "type": "uint256", "name": "timestamp", "indexed": false }
-    ]
-  },
-  {
-    "type": "function",
-    "name": "getMessage",
-    "constant": true,
-    "stateMutability": "view",
-    "payable": false,
-    "inputs": [{ "type": "uint256", "name": "id" }],
-    "outputs": [
-      {
-        "type": "tuple",
-        "name": "",
-        "components": [
-          { "type": "uint256", "name": "id" },
-          { "type": "string", "name": "content" },
-          { "type": "address", "name": "author" },
-          { "type": "uint256", "name": "timestamp" }
-        ]
-      }
-    ]
-  },
-  {
-    "type": "function",
-    "name": "getMessages",
-    "constant": true,
-    "stateMutability": "view",
-    "payable": false,
-    "inputs": [
-      { "type": "uint256", "name": "offset" },
-      { "type": "uint256", "name": "limit" }
-    ],
-    "outputs": [
-      {
-        "type": "tuple[]",
-        "name": "page",
-        "components": [
-          { "type": "uint256", "name": "id" },
-          { "type": "string", "name": "content" },
-          { "type": "address", "name": "author" },
-          { "type": "uint256", "name": "timestamp" }
-        ]
-      }
-    ]
-  },
-  {
-    "type": "function",
-    "name": "publishMessage",
-    "constant": false,
-    "payable": false,
-    "inputs": [{ "type": "string", "name": "content" }],
-    "outputs": []
-  },
-  {
-    "type": "function",
-    "name": "totalMessages",
-    "constant": true,
-    "stateMutability": "view",
-    "payable": false,
     "inputs": [],
-    "outputs": [{ "type": "uint256", "name": "" }]
+    "name": "EmptyMessage",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidId",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidLimit",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidUtf8",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MessageTooLong",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "author",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "content",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "MessagePublished",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_MESSAGE_CHARACTERS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "getMessage",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "content",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Mural.Message",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "offset",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getMessages",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "content",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Mural.Message[]",
+        "name": "page",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "content",
+        "type": "string"
+      }
+    ],
+    "name": "publishMessage",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalMessages",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ]

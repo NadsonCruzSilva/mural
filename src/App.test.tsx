@@ -143,7 +143,13 @@ describe("Mural interface", () => {
     });
     expect(screen.getAllByText("0x9999…9999").length).toBeGreaterThan(0);
     fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "🌎".repeat(281) },
+      target: { value: "🌎".repeat(1500) },
+    });
+    expect(
+      screen.getByRole("button", { name: "Registrar na blockchain" }),
+    ).toBeEnabled();
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "🌎".repeat(1501) },
     });
     expect(
       screen.getByRole("button", { name: "Registrar na blockchain" }),

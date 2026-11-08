@@ -27,23 +27,47 @@ npm run dev
 
 Abra o endereço mostrado pelo Vite (normalmente http://localhost:5173). Sem implantação, a interface mostra instruções reais de configuração, sem recados fictícios. A consulta pública não exige MetaMask nem assinatura.
 
-## Implantar na Sepolia
+## Nova versão com limite de 1.500 caracteres
 
-1. No `.env`, configure `SEPOLIA_RPC_URL` e `VITE_RPC_URL` para a **mesma rede Sepolia**. O RPC usado pelo frontend é público para quem acessa o site; use somente credenciais de RPC adequadas a navegador.
-2. Configure `DEPLOYER_PRIVATE_KEY` com a chave de uma **carteira dedicada a testes**, com ETH Sepolia. Essa variável é usada apenas pelo script local de implantação; nunca use o prefixo `VITE_` para segredos. O arquivo `.env` está ignorado pelo Git. A interface pede apenas autorização da MetaMask e nunca solicita chave ou frase de recuperação.
-3. Execute:
+O contrato desta versão aceita até **1.500 valores escalares Unicode** (até 6.000 bytes em UTF-8). O contrato anterior de 280 caracteres não é atualizado nem apagado. A nova implantação terá outro endereço, contador zero e nenhum recado; o histórico antigo não será importado nem exibido no novo mural.
 
-```sh
-npm run deploy:sepolia
-npm run dev
+Para começar o novo mural, siga a implantação abaixo usando o **arquivo Mural.sol atualizado**. Troque `VITE_CONTRACT_ADDRESS` e `VITE_DEPLOYMENT_BLOCK` no `.env` pelos valores da **nova** implantação e reinicie a aplicação. Não reutilize o endereço anterior. A interface verifica o limite informado pelo contrato e mostra uma orientação se ainda estiver conectado à versão antiga, antes de enviar publicações.
+
+A configuração antiga foi preservada durante a atualização do código. Só substitua os dados após confirmar a nova implantação na MetaMask. Aumentar a mensagem aumenta o consumo de gas: confira a estimativa da carteira para cada publicação.
+
+## Implantar na Sepolia sem exportar a chave privada
+
+A implantação é assinada na MetaMask pelo [Remix oficial](https://remix.ethereum.org). Não coloque senha, frase de recuperação nem chave privada em nenhum arquivo do projeto. Se já houver um campo `DEPLOYER_PRIVATE_KEY` no seu `.env`, remova-o: ele não é mais utilizado. O projeto aceita a configuração pública em `src/generated/deployment.json`, mas o contrato deve ser compatível com esta versão de 1.500 caracteres. Para substituir a versão antiga de 280, é obrigatória uma nova implantação.
+
+### 1. Implantar com Remix e MetaMask
+
+1. Abra o Remix no mesmo navegador em que a extensão MetaMask está instalada e desbloqueada.
+2. Crie um arquivo `Mural.sol` no Remix e copie para ele o conteúdo completo de `contracts/Mural.sol` deste projeto.
+3. Em **Solidity Compiler**, selecione **0.8.28**. Nas opções avançadas, use EVM **cancun** e otimização habilitada com **200 runs**, iguais ao projeto. Clique em **Compile Mural.sol**.
+4. Na MetaMask, selecione **Ethereum Sepolia** e uma conta com ETH de teste.
+5. Abra **Deploy & Run Transactions** no Remix. Em **Environment**, selecione **Browser Extension → MetaMask** (em algumas versões, **Injected Provider - MetaMask**). Autorize a conexão na MetaMask e confira a rede **Sepolia / 11155111** no Remix. Não use Remix VM para a implantação pública.
+6. Selecione o contrato **Mural** e deixe **Value = 0 Wei**. O construtor não recebe parâmetros. Clique em **Deploy** e confirme a transação na própria MetaMask.
+7. Aguarde a confirmação. Copie o endereço em **Deployed Contracts**. Abra a transação de implantação no [Etherscan Sepolia](https://sepolia.etherscan.io) e anote o **Block** (número do bloco).
+
+Referência: [documentação de implantação do Remix](https://remix-ide.readthedocs.io/en/latest/run.html).
+
+### 2. Conectar a aplicação ao contrato
+
+No `.env`, preencha somente dados públicos:
+
+```dotenv
+VITE_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
+VITE_CONTRACT_ADDRESS=ENDERECO_DO_CONTRATO_MURAL
+VITE_DEPLOYMENT_BLOCK=NUMERO_DO_BLOCO_DE_IMPLANTACAO
 ```
 
-O script aguarda uma confirmação e grava `src/generated/deployment.json` (endereço, chain ID e bloco de implantação) e a ABI em `src/generated/abi.json`. Reinicie o Vite depois da primeira implantação. Cada nova implantação cria um mural vazio e independente; para continuar usando o mesmo mural, preserve a configuração anterior. Não há migração ou proxy de atualização.
+Substitua os dois últimos valores pelo endereço `0x...` do **contrato**, e pelo número inteiro do bloco, sem separadores de milhares. Não use o endereço da sua carteira. O RPC deve ser da Ethereum Sepolia e permitir consultas a eventos. O bloco inicial é necessário para encontrar os links das publicações sem consultar todo o histórico da rede.
 
-4. Abra a aplicação no mesmo navegador da MetaMask. Vá a **Publicar recado**, conecte a carteira e, se necessário, use **Trocar de rede**. Escreva e confirme a transação na MetaMask.
-5. Aguarde a confirmação, volte ao mural, recarregue a página e confira o link no [Etherscan Sepolia](https://sepolia.etherscan.io).
+Execute `npm run dev` (reinicie se já estiver rodando). Abra a aplicação, clique em **Publicar recado → Conectar carteira**, selecione Sepolia e confirme a publicação na MetaMask. Depois confira o recado e o link da transação no mural.
 
-A MetaMask não distribui ETH de teste automaticamente. Se o saldo se esgotar, obtenha ETH Sepolia por um faucet e confira se está usando Ethereum Sepolia, e não Base Sepolia ou outra rede.
+Os campos públicos explícitos do `.env` têm prioridade sobre `src/generated/deployment.json` e sempre selecionam Sepolia. Caso estejam inválidos ou o bloco esteja ausente, a interface mostra instruções de configuração. Se `VITE_CONTRACT_ADDRESS` estiver vazio, usa a configuração gerada existente. Uma configuração gerada pode ser reutilizada apenas se apontar para a versão de 1.500 caracteres.
+
+Cada nova implantação cria um mural vazio e independente. Guarde os dados do contrato antigo caso queira consultá-lo separadamente; os registros não são transferidos. A MetaMask não distribui ETH de teste automaticamente: se necessário, use um faucet de **Ethereum Sepolia**, e não de Base Sepolia.
 
 ## Desenvolvimento inteiramente local
 
@@ -60,9 +84,9 @@ npm run deploy:local
 npm run dev
 ```
 
-No `.env`, ajuste `VITE_RPC_URL=http://127.0.0.1:8545` ou remova essa variável para que a implantação local selecione o RPC local automaticamente. Importe na MetaMask uma conta de desenvolvimento exibida pelo Hardhat e configure a rede local com chain ID `31337`, RPC `http://127.0.0.1:8545` e símbolo `ETH`. Essas contas são públicas e servem exclusivamente para o ambiente local. A interface permite adicionar a rede quando necessário. No ambiente local, o botão da transação copia o hash, pois não há Etherscan.
+Para usar a implantação local, deixe `VITE_CONTRACT_ADDRESS` e `VITE_DEPLOYMENT_BLOCK` vazios. No `.env`, ajuste `VITE_RPC_URL=http://127.0.0.1:8545` ou remova essa variável para que a implantação local selecione o RPC local automaticamente. Importe na MetaMask uma conta de desenvolvimento exibida pelo Hardhat e configure a rede local com chain ID `31337`, RPC `http://127.0.0.1:8545` e símbolo `ETH`. Essas contas são públicas e servem exclusivamente para o ambiente local. A interface permite adicionar a rede quando necessário. No ambiente local, o botão da transação copia o hash, pois não há Etherscan.
 
-Reiniciar o nó apaga o histórico local. Faça nova implantação, reinicie a interface e limpe a atividade da conta local na MetaMask se o nonce estiver desatualizado. Para voltar à Sepolia, restaure o RPC no `.env` e a configuração da implantação Sepolia, ou implante outro contrato.
+Reiniciar o nó apaga o histórico local. Faça nova implantação, reinicie a interface e limpe a atividade da conta local na MetaMask se o nonce estiver desatualizado. Para voltar à Sepolia, restaure o RPC e informe o endereço do contrato Sepolia e seu bloco no `.env`, ou restaure a configuração gerada anterior.
 
 ## Verificação
 
@@ -79,7 +103,7 @@ Roteiro manual na Sepolia:
 - Consulte o mural sem conectar a carteira.
 - Publique com MetaMask, recuse uma solicitação e tente novamente.
 - Troque a conta e a rede; confirme que a interface acompanha a mudança.
-- Teste um recado com acentos e emojis e o limite de 280 caracteres.
+- Teste um recado com acentos e emojis e o limite de 1.500 caracteres.
 - Recarregue a aplicação e confira a transação e o endereço do contrato no explorador.
 - Confira em tela de celular e computador, com mural vazio e com recados.
 
@@ -89,9 +113,10 @@ O contrato `Mural` é append-only: não possui proprietário, edição, exclusã
 
 | Interface                                          | Comportamento                                                                                              |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `publishMessage(string)`                           | Publica de 1 a 280 valores escalares Unicode e emite evento.                                               |
+| `publishMessage(string)`                           | Publica de 1 a 1.500 valores escalares Unicode e emite evento.                                             |
 | `getMessage(uint256)`                              | Obtém registro por ID, iniciado em 1; ID inválido reverte.                                                 |
 | `getMessages(offset, limit)`                       | Ordem crescente por ID, offset iniciado em 0, limite entre 1 e 50. Offset além do fim retorna lista vazia. |
+| `MAX_MESSAGE_CHARACTERS()`                         | Retorna o limite de 1.500 caracteres desta versão.                                                         |
 | `totalMessages()`                                  | Retorna o contador global.                                                                                 |
 | `MessagePublished(id, author, content, timestamp)` | ID e autor indexados; o log fornece o hash da transação.                                                   |
 

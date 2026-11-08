@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { MESSAGE_LIMIT } from "./limits";
 import {
   ArrowDown,
   ArrowLeft,
@@ -528,7 +529,10 @@ export default function App() {
               </span>
               <div>
                 <h3>Sua próxima ideia merece um lugar aqui.</h3>
-                <p>Até 280 caracteres. Uma pequena marca que permanece.</p>
+                <p>
+                  Até {MESSAGE_LIMIT.toLocaleString("pt-BR")} caracteres. Uma
+                  pequena marca que permanece.
+                </p>
               </div>
               <a href="#/publicar" className="text-button">
                 Deixar meu recado
@@ -577,10 +581,10 @@ export default function App() {
                   <span>Pequenas palavras também deixam grandes marcas.</span>
                   <span
                     id="char-count"
-                    className={count > 280 ? "over-limit" : ""}
+                    className={count > MESSAGE_LIMIT ? "over-limit" : ""}
                   >
                     {count}
-                    <span> / 280</span>
+                    <span> / {MESSAGE_LIMIT.toLocaleString("pt-BR")}</span>
                   </span>
                 </div>
                 <div className="public-warning" id="public-warning">
@@ -687,7 +691,8 @@ export default function App() {
                 <h4>Como a publicação acontece</h4>
                 <ol className="steps">
                   <li>
-                    <span>1</span>Escreva até 280 caracteres.
+                    <span>1</span>Escreva até{" "}
+                    {MESSAGE_LIMIT.toLocaleString("pt-BR")} caracteres.
                   </li>
                   <li>
                     <span>2</span>Confirme a transação na carteira.
@@ -756,10 +761,10 @@ function Setup({ onHelp }: { onHelp: () => void }) {
       </p>
       <div className="setup-instructions">
         <span>
-          01 <strong>Configure o RPC e a carteira de teste no .env</strong>
+          01 <strong>Implante o contrato pelo Remix com a MetaMask</strong>
         </span>
         <span>
-          02 <strong>Execute npm run deploy:sepolia</strong>
+          02 <strong>Informe o endereço do contrato e o bloco no .env</strong>
         </span>
         <span>
           03 <strong>Reinicie com npm run dev</strong>

@@ -11,8 +11,8 @@ import {
 describe("Unicode validation", () => {
   it("counts scalar values rather than UTF-16 units", () => {
     expect(characterCount("Olá 🌎")).toBe(5);
-    expect(validMessage("🌎".repeat(280))).toBe(true);
-    expect(validMessage("á".repeat(281))).toBe(false);
+    expect(validMessage("🌎".repeat(1500))).toBe(true);
+    expect(validMessage("á".repeat(1501))).toBe(false);
     expect(validMessage("")).toBe(false);
     expect(characterCount("e\u0301")).toBe(2);
   });
